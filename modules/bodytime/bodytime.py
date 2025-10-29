@@ -1,14 +1,14 @@
 import datetime
 import sys
 import os
+import colorama
 
-triage = os.environ["TRIAGE"]
+triage = os.environ["TRIAGE_PATH"]
 
 if __name__ == '__main__':
     body_path = f"{triage}/bodyfile/bodyfile.txt"
     if not os.path.exists(body_path):
-        print(f"ERROR\nbody file path is not specified\nPlease check file path: {body_path}")
-    
+        print(f"ERROR\nbody file does not exist\nPlease check file path: {body_path}")  
     try:
         f = open(body_path, 'r+')
     except:
@@ -19,8 +19,9 @@ if __name__ == '__main__':
         for line in f:
             try:
                 decoded = line.decode('utf-8')
+            # нужно для обработки ошибок
             except UnicodeDecodeError:
-                decoded = line.decode('latin-1')  # или другой подходящей кодировки
+                decoded = line.decode('latin-1')
             text.append(decoded)
     output_file = open(f'{body_path[:-4]}_convert.txt', 'w')
 
@@ -36,5 +37,6 @@ if __name__ == '__main__':
         
     output_file.close() 
     f.close()
-    print('Module bodytime: Success')
+    print('Module bodytime: ' + colorama.Fore.GREEN + 'Success')
+
 

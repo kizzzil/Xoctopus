@@ -1,7 +1,7 @@
 import os
 import argparse
 
-triage = os.environ["TRIAGE"]
+triage = os.environ["TRIAGE_PATH"]
 
 if __name__ == "__main__":
      
