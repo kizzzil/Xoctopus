@@ -23,7 +23,7 @@ if __name__ == '__main__':
             except UnicodeDecodeError:
                 decoded = line.decode('latin-1')
             text.append(decoded)
-    output_file = open(f'{body_path[:-4]}_convert.txt', 'w')
+    output_file = open(f'{triage}/bodyfile_convert.txt', 'w')
 
     for line in text:
         row = line.split('|')
