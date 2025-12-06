@@ -5,14 +5,15 @@ import click
 import colorama
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+ZIMMERMAN_PATH = '/mnt/c/tools/'
 
-def run_module(module):
+def run_module(module, os_name):
     print(f"Runnning module: {module}")
-    subprocess.run([sys.executable, f"{module}.py"], check=True, cwd=f"{BASE_DIR}/modules/{module}")
+    subprocess.run([sys.executable, f"{module}.py"], check=True, cwd=f"{BASE_DIR}/modules/{os_name}/{module}")
     print(colorama.Style.RESET_ALL, end='')
 
-def update_modules():
-    module_names = os.listdir(f"{BASE_DIR}/modules/")
+def update_modules(os_name):
+    module_names = os.listdir(f"{BASE_DIR}/modules/{os_name}/")
     # Далее тут будет проверка на валидность модулей.
     return module_names 
 
@@ -28,20 +29,24 @@ def main(t, p):
         else:
             with open(f"{BASE_DIR}/cache/latest.conf", "r") as latest:
                 t = latest.readline()
-
     else:
+        if os.path.exists(f'{t}/[root]/'):
+            os_name = 'lin'
+        elif os.path.exists(f'{t}/Target/'):
+            os_name = 'win'
+        else: print(f'Ошибка чтения триажа по пути {t}')
         os.environ["TRIAGE_NAME"] = t.split('/')[-1]
         with open(f"{BASE_DIR}/cache/latest.conf", "w") as latest:
             latest.write(t)
      
     #Переменная среды для передачи subrocess пути к триажу
     os.environ["TRIAGE_PATH"] = t
-    module_names = update_modules() 
+    module_names = update_modules(os_name) 
     if not p: 
         for module in module_names:
-            run_module(module)
+            run_module(module, os_name)
     elif p in module_names:
-        run_module(p)
+        run_module(p, os_name)
     else:
         print(f'module with name {p} undefined')
 

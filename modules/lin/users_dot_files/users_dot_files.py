@@ -18,13 +18,11 @@ def ssort_filename(path):
     with open(path, 'w', encoding='utf-8') as f:
         for line, count in reversed(counter.most_common()):
             f.write(f"{count} {line}\n")
-
     
 def main():
     if os.path.exists(f'{triage}[root]/home/'):  
         users = [f'[root]/home/{user}/' for user in os.listdir(f'{triage}[root]/home/')]
         users.append('[root]/root/')
-        print(users)
 
     # type 0 - sort not required
     # type 1 - sort is strictly required 
