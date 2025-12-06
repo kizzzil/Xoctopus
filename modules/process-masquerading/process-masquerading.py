@@ -11,7 +11,7 @@ if __name__ == "__main__":
    
     # Проверяем существует ли вообще путь до папки (иногда его не бывает)
     if os.path.exists(path_to_proc):
-        with open(f'{triage}/proccess_masquerading.txt', 'w+') as f:
+        with open(f'{triage}/proccess_masquerading.txt', 'w') as of:
         
             for pid in pid_list:
                 cmdline_path = f'{path_to_proc}/{pid}/cmdline.txt'
@@ -29,6 +29,6 @@ if __name__ == "__main__":
                     if stop_str:
                         cmdline = cmdline[:stop_str]
                     if cmdline != maps_exec_path:
-                        f.write(cmdline + '\t' + maps_exec_path + '\t' + pid + '\n')
+                        of.write(cmdline + '\t' + maps_exec_path + '\t' + pid + '\n')
                 else:
                     continue

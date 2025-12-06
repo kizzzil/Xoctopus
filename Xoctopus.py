@@ -18,8 +18,9 @@ def update_modules():
 
 @click.version_option("0.0.1", prog_name="Xoctopus")
 @click.command()
-@click.option('-t', help='Path to triage (target)')
-def main(t):
+@click.option('-t', default=None, help='Path to triage (target)')
+@click.option('-p', default=None, help='Use specific plugin plugin_name')
+def main(t, p):
     if not t:
         if os.listdir(f"{BASE_DIR}/cache/") == []:
             click.echo('Please specify -t parametr')
@@ -36,8 +37,13 @@ def main(t):
     #Переменная среды для передачи subrocess пути к триажу
     os.environ["TRIAGE_PATH"] = t
     module_names = update_modules() 
-    for module in module_names:
-        run_module(module)
+    if not p: 
+        for module in module_names:
+            run_module(module)
+    elif p in module_names:
+        run_module(p)
+    else:
+        print(f'module with name {p} undefined')
 
 if __name__ == "__main__":
     main()
