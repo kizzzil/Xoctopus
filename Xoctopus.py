@@ -5,7 +5,7 @@ import click
 import colorama
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-ZIMMERMAN_PATH = '/mnt/c/tools/'
+os.environ["ZIMMERMAN_TOOLS_PATH"] = '/mnt/c/tools/' 
 
 def run_module(module, os_name):
     print(f"Runnning module: {module}")
