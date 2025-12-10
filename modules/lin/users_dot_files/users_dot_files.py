@@ -20,10 +20,15 @@ def ssort_filename(path):
             f.write(f"{count} {line}\n")
     
 def main():
+    users = []
+    if os.path.exists(f'{triage}[root]/home/'):
+        users.append(['[root]/root/'])
     if os.path.exists(f'{triage}[root]/home/'):  
-        users = [f'[root]/home/{user}/' for user in os.listdir(f'{triage}[root]/home/')]
-        users.append('[root]/root/')
-
+        users_home = [f'[root]/home/{user}/' for user in os.listdir(f'{triage}[root]/home/')]
+        users.extend(users_home) 
+    if users == []:
+        sys.exit(0)
+    
     # type 0 - sort not required
     # type 1 - sort is strictly required 
     filenames = {'.bashrc' : 0, '.zshrc' : 0, '.bash_profile' : 0, '.bash_login' : 0, '.bash_logout' : 0, '.bash_history' : 1}

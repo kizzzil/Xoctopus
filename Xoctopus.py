@@ -34,7 +34,8 @@ def run_analyze(os_name, p, t):
         print(f'module with name {p} undefined')
 
 def lin_or_win(triage_path):
-    if os.path.exists(f'{triage_path}/[root]/'):
+    if os.path.exists(f'{triage_path}/[root]/') or \
+            os.path.exists(f'{triage_path}/chkrootkit/'):
         return 'lin'
     elif os.path.exists(f'{triage_path}/Target/'):
         return 'win'
@@ -56,7 +57,6 @@ def main(triage, plugin, current, many_triage_dir):
         else:
             potential_triages = [f'{many_triage_dir}/{dir}' 
                                     for dir in os.listdir(many_triage_dir)]
-            print(potential_triages)
         triages = {}
 
         #filter unsuitable items
