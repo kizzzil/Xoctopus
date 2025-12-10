@@ -39,13 +39,12 @@ def lin_or_win(triage_path):
         return 'win'
     return None
 
-@click.version_option("0.0.1", prog_name="Xoctopus")
-@click.command()
+@click.version_option("0.1.0", prog_name="Xoctopus")
+@click.command(no_args_is_help=True)
 @click.option('-t', default=None, help='Path to triage (target)')
 @click.option('-p', default=None, help='Use specific plugin plugin_name')
-@click.option('-c', default=None, is_flag=True, help='Use current directory (Xoctopus.py/../) for analyze triages')
+@click.option('-c', default=None, is_flag=True, help='Use current directory (Xoctopus.py/../) for analyze many triages')
 def main(t, p, c):
-
     
     if c:
         potential_triages = [f'{BASE_DIR}/../{triage_dir}' \
