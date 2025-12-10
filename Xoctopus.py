@@ -45,12 +45,18 @@ def lin_or_win(triage_path):
 @click.option('-t', '--triage', default=None, help='Path to triage (target)')
 @click.option('-p', '--plugin', default=None, help='Use specific plugin plugin_name')
 @click.option('-c', '--current',default=None, is_flag=True, help='Use current directory (Xoctopus.py/../) for analyze many triages')
+@click.option('-m', '--many-triage-dir', default=None, help='Path to triage (target)')
 
-def main(triage, plugin, current):
-    
-    if current:
-        potential_triages = [f'{BASE_DIR}/../{triage_dir}' \
-                                for triage_dir in os.listdir(f'{BASE_DIR}/../')]
+def main(triage, plugin, current, many_triage_dir):
+
+    if current or many_triage_dir:
+        if current:
+            potential_triages = [f'{BASE_DIR}/../{triage_dir}' \
+                                    for triage_dir in os.listdir(f'{BASE_DIR}/../')]
+        else:
+            potential_triages = [f'{many_triage_dir}/{dir}' 
+                                    for dir in os.listdir(many_triage_dir)]
+            print(potential_triages)
         triages = {}
 
         #filter unsuitable items
