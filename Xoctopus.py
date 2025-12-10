@@ -42,12 +42,13 @@ def lin_or_win(triage_path):
 
 @click.version_option("0.1.0", prog_name="Xoctopus")
 @click.command(no_args_is_help=True)
-@click.option('-t', default=None, help='Path to triage (target)')
-@click.option('-p', default=None, help='Use specific plugin plugin_name')
-@click.option('-c', default=None, is_flag=True, help='Use current directory (Xoctopus.py/../) for analyze many triages')
-def main(t, p, c):
+@click.option('-t', '--triage', default=None, help='Path to triage (target)')
+@click.option('-p', '--plugin', default=None, help='Use specific plugin plugin_name')
+@click.option('-c', '--current',default=None, is_flag=True, help='Use current directory (Xoctopus.py/../) for analyze many triages')
+
+def main(triage, plugin, current):
     
-    if c:
+    if current:
         potential_triages = [f'{BASE_DIR}/../{triage_dir}' \
                                 for triage_dir in os.listdir(f'{BASE_DIR}/../')]
         triages = {}
@@ -59,22 +60,22 @@ def main(t, p, c):
                 triages[path] = os_name
 
         for path in tqdm(triages.keys()):
-            run_analyze(triages[path], p, path)
+            run_analyze(triages[path], plugin, path)
     
-    elif t:
+    elif triage:
         os_name = lin_or_win(t)
-        os.environ["TRIAGE_NAME"] = t.split('/')[-1]
+        os.environ["TRIAGE_NAME"] = triage.split('/')[-1]
         with open(f"{BASE_DIR}/cache/latest.conf", "w") as latest:
-            latest.write(t) 
-        run_analyze(os_name, p, t)
+            latest.write(triage) 
+        run_analyze(os_name, plugin, triage)
     else:
         if os.listdir(f"{BASE_DIR}/cache/") == []:
             click.echo('Please specify -t or -c parametr')
             sys.exit()
         else:
             with open(f"{BASE_DIR}/cache/latest.conf", "r") as latest:
-                t = latest.readline()
-                run_analyze(os_name, p, t)
+                triage = latest.readline()
+                run_analyze(os_name, plugin, triage)
 
 if __name__ == "__main__":
     main()
