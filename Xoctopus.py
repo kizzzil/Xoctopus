@@ -1,8 +1,9 @@
 import sys
 import os
 import subprocess
-import click
+import click            # requirements.txt
 import colorama
+from tqdm import tqdm   # requirements.txt
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 os.environ["ZIMMERMAN_TOOLS_PATH"] = '/mnt/c/tools/' 
@@ -57,7 +58,7 @@ def main(t, p, c):
             if os_name is not None:
                 triages[path] = os_name
 
-        for path in triages.keys():
+        for path in tqdm(triages.keys()):
             run_analyze(triages[path], p, path)
     
     elif t:
