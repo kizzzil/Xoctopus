@@ -5,6 +5,14 @@ import click            # requirements.txt
 import colorama
 from tqdm import tqdm   # requirements.txt
 
+help_epilog = '''
+##DEFAULT MODULES##\b\n
+NAME\t\tDESCRIPTION\n
+bodytime\tparse and convert bodytime timestamp to human readable view\n
+user_dor_files\tgenerate summarize users dot files
+'''
+
+
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 os.environ["ZIMMERMAN_TOOLS_PATH"] = '/mnt/c/tools/' 
 
@@ -42,11 +50,11 @@ def lin_or_win(triage_path):
     return None
 
 @click.version_option("0.1.0", prog_name="Xoctopus")
-@click.command(no_args_is_help=True)
+@click.command(no_args_is_help=True, epilog=help_epilog)
 @click.option('-t', '--triage', default=None, help='Path to triage (target)')
 @click.option('-p', '--plugin', default=None, help='Use specific plugin plugin_name')
-@click.option('-c', '--current',default=None, is_flag=True, help='Use current directory (Xoctopus.py/../) for analyze many triages')
-@click.option('-m', '--many-triage-dir', default=None, help='Path to triage (target)')
+@click.option('-c', '--current',default=None, is_flag=True, help='Use current directory for analyze many triages')
+@click.option('-m', '--many-triage-dir', default=None, help='Path to dir with many triages')
 
 def main(triage, plugin, current, many_triage_dir):
 
