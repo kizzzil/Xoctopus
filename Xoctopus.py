@@ -9,37 +9,51 @@ help_epilog = '''
 ##DEFAULT MODULES##\b\n
 NAME\t\tDESCRIPTION\n
 bodytime\tparse and convert bodytime timestamp to human readable view\n
-user_dor_files\tgenerate summarize users dot files
 '''
-
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 os.environ["ZIMMERMAN_TOOLS_PATH"] = '/mnt/c/tools/' 
 
-def run_module(module, os_name):
-    print(f"Runnning module: {module}")
-    subprocess.run([sys.executable, f"{module}.py"], check=True, cwd=f"{BASE_DIR}/modules/{os_name}/{module}")
-    print(colorama.Style.RESET_ALL, end='')
+def run_module(module_name, type_module, os_name):
+    file_path = f"{BASE_DIR}/modules/{type_module}/{os_name}/{module_name}"
+    if os.path.exists(file_path):
+        print(f"Runnning module: {module_name}")
+        subprocess.run([sys.executable, f"{module_name}.py"], check=True, cwd=file_path)
+        print(colorama.Style.RESET_ALL, end='')
 
 def update_modules(os_name):
-    module_names = os.listdir(f"{BASE_DIR}/modules/{os_name}/")
-    # Далее тут будет проверка на валидность модулей.
-    return module_names 
+    parsers = os.listdir(f"{BASE_DIR}/modules/parsers/{os_name}/")
+    analyzators = os.listdir(f"{BASE_DIR}/modules/analyzators/{os_name}/")
+    summaryzators = os.listdir(f"{BASE_DIR}/modules/summaryzators/{os_name}/")
+    return (parsers, analyzators, summaryzators) 
 
 '''
 run_analyze() is a function, for analyze one triage
 ''' 
-def run_analyze(os_name, p, t):
+def run_parse_and_analyze(os_name, p, t, do_all, modules):
     #Переменная среды для передачи subrocess пути к триажу
     os.environ["TRIAGE_PATH"] = t
-    module_names = update_modules(os_name) 
+    parsers, analyzators, summarizators = modules[os_name]
+
     if not p: 
-        for module in module_names:
-            run_module(module, os_name)
-    elif p in module_names:
-        run_module(p, os_name)
+        for module in parsers:
+            run_module(module, 'parsers', os_name)
+        if do_all is not None:
+            for module in analyzators:
+                run_module(module, 'analyzators', os_name)
+    elif p in parsers or p in analyzators:
+        type_module, module_name = p.split('/')
+        run_module(module_name, type_module, os_name)
     else:
         print(f'module with name {p} undefined')
+
+def run_summarize(os_name, summaryzators, p):
+    if p:
+        type_module, module_name = p.split('/')
+        run_module(module_name, 'summaryzators', os_name)
+    else:
+        for module in summaryzators:
+            run_module(module_name, 'summaryzators', os_name)
 
 def lin_or_win(triage_path):
     if os.path.exists(f'{triage_path}/[root]/') or \
@@ -52,14 +66,18 @@ def lin_or_win(triage_path):
 @click.version_option("0.1.0", prog_name="Xoctopus")
 @click.command(no_args_is_help=True, epilog=help_epilog)
 @click.option('-t', '--triage', default=None, help='Path to triage (target)')
-@click.option('-p', '--plugin', default=None, help='Use specific plugin plugin_name')
+@click.option('-p', '--plugin', default=None, help='Use specific plugin(module) example "parsers/bodytime"')
 @click.option('-c', '--current',default=None, is_flag=True, help='Use current directory for analyze many triages')
 @click.option('-m', '--many-triage-dir', default=None, help='Path to dir with many triages')
+@click.option('-s', '--summarize', default=None, is_flag=True, help='Use current directory for analyze many triages')
+@click.option('-a', '--do-all', default=None, is_flag=True, help='Just do it all' )
+@click.option('--parse', '--only-parse', default=None, is_flag=True, help='Just only parse' )
 
-def main(triage, plugin, current, many_triage_dir):
-
+def main(triage, plugin, current, many_triage_dir, summarize, do_all, parse):
+    
+    modules = {'lin' : update_modules('lin'), 'win' : update_modules('win')}
     if current or many_triage_dir:
-        if current:
+        if current: 
             potential_triages = [f'{BASE_DIR}/../{triage_dir}' \
                                     for triage_dir in os.listdir(f'{BASE_DIR}/../')]
         else:
@@ -70,18 +88,22 @@ def main(triage, plugin, current, many_triage_dir):
         #filter unsuitable items
         for path in potential_triages:
             os_name = lin_or_win(path) 
+            print(path, os_name)
             if os_name is not None:
                 triages[path] = os_name
-
+        
         for path in tqdm(triages.keys()):
-            run_analyze(triages[path], plugin, path)
-    
+            print(triages[path], plugin, path, do_all, modules) 
+            run_parse_and_analyze(triages[path], plugin, path, do_all, modules)
+        # if summarize or do_all:
+        #     run_summarize(os_name, summaryzators, p)
+
     elif triage:
-        os_name = lin_or_win(t)
+        os_name = lin_or_win(triage)
         os.environ["TRIAGE_NAME"] = triage.split('/')[-1]
         with open(f"{BASE_DIR}/cache/latest.conf", "w") as latest:
             latest.write(triage) 
-        run_analyze(os_name, plugin, triage)
+        run_parse_and_analyze(os_name, plugin, triage, do_all, modules)
     else:
         if os.listdir(f"{BASE_DIR}/cache/") == []:
             click.echo('Please specify -t or -c parametr')
