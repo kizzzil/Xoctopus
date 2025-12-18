@@ -34,28 +34,40 @@ def run_parse_and_analyze(os_name, p, t, do_all, modules):
     #Переменная среды для передачи subrocess пути к триажу
     os.environ["TRIAGE_PATH"] = t
     parsers, analyzators, summarizators = modules[os_name]
-
+    
     if not p: 
         for module in parsers:
             run_module(module, 'parsers', os_name)
         if do_all is not None:
             for module in analyzators:
                 run_module(module, 'analyzators', os_name)
-    elif p in parsers or p in analyzators:
-        type_module, module_name = p.split('/')
+    elif os.path.exists(f'{BASE_DIR}/modules/{p}'):
+        type_module, os_name, module_name = p.split('/')
         run_module(module_name, type_module, os_name)
     else:
         print(f'module with name {p} undefined')
 
-def run_summarize(os_name, modules, p):
-    _, summaryzators, _ = modules[os_name]
+def run_summarize(modules, p):
+    ### summarize for lin
+    _, _, summaryzators_lin = modules['lin']
 
     if p:
-        type_module, module_name = p.split('/')
-        run_module(module_name, 'summaryzators', os_name)
+        type_module, _ ,module_name = p.split('/')
+        run_module(module_name, 'summaryzators', 'lin')
     else:
-        for module in summaryzators:
-            run_module(module_name, 'summaryzators', os_name)
+        for module_name in summaryzators_lin:
+            run_module(module_name, 'summaryzators', 'lin')
+
+    ### summmarize for win
+
+    _, _, summaryzators_win = modules['win']
+
+    if p:
+        type_module, _, module_name = p.split('/')
+        run_module(module_name, 'summaryzators', 'win')
+    else:
+        for module_name in summaryzators_lin:
+            run_module(module_name, 'summaryzators', 'win')
 
 def lin_or_win(triage_path):
     if os.path.exists(f'{triage_path}/[root]/') or \
@@ -90,18 +102,16 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, parse):
         #filter unsuitable items
         for path in potential_triages:
             os_name = lin_or_win(path) 
-            print(path, os_name)
             if os_name is not None:
                 triages[path] = os_name
         
         for path in tqdm(triages.keys()):
-            print(triages[path], plugin, path, do_all, modules) 
             run_parse_and_analyze(triages[path], plugin, path, do_all, modules)
-
+        
         if summarize or do_all:
             os.environ['TRIAGE_PATHES'] = ";".join([ f'{x},{triages[x]}' for x in triages.keys()])  
-            print(os.environ['TRIAGE_PATHES'])
-            run_summarize(os_name, 'summaryzators', p)
+            print('### RUN SUMMARYZATORS###')
+            run_summarize(modules, plugin)
 
     elif triage:
         os_name = lin_or_win(triage)

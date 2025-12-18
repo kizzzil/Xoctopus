@@ -23,7 +23,7 @@ if __name__ == '__main__':
             except UnicodeDecodeError:
                 decoded = line.decode('latin-1')
             text.append(decoded)
-    output_file = open(f'{triage}/bodyfile_convert.txt', 'w')
+    output_file = open(f'{triage}/Xoctopus_bodyfile_convert.txt', 'w')
 
     for line in text:
         row = line.split('|')
@@ -38,5 +38,6 @@ if __name__ == '__main__':
     output_file.close() 
     f.close()
     print('Module bodytime: ' + colorama.Fore.GREEN + 'Success')
+
 
 

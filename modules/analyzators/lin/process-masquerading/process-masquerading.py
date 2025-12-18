@@ -13,7 +13,7 @@ if __name__ == "__main__":
     
         # Проверяем существует ли вообще путь до папки (иногда его не бывает)
         if os.path.exists(path_to_proc):
-            with open(f'{triage}/proccess_masquerading.txt', 'w') as of:
+            with open(f'{triage}/Xoctopus_proccess_masquerading.txt', 'w') as of:
             
                 for pid in pid_list:
                     cmdline_path = f'{path_to_proc}/{pid}/cmdline.txt'
