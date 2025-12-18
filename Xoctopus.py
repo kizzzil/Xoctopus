@@ -47,7 +47,9 @@ def run_parse_and_analyze(os_name, p, t, do_all, modules):
     else:
         print(f'module with name {p} undefined')
 
-def run_summarize(os_name, summaryzators, p):
+def run_summarize(os_name, modules, p):
+    _, summaryzators, _ = modules[os_name]
+
     if p:
         type_module, module_name = p.split('/')
         run_module(module_name, 'summaryzators', os_name)
@@ -95,8 +97,11 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, parse):
         for path in tqdm(triages.keys()):
             print(triages[path], plugin, path, do_all, modules) 
             run_parse_and_analyze(triages[path], plugin, path, do_all, modules)
-        # if summarize or do_all:
-        #     run_summarize(os_name, summaryzators, p)
+
+        if summarize or do_all:
+            os.environ['TRIAGE_PATHES'] = ";".join([ f'{x},{triages[x]}' for x in triages.keys()])  
+            print(os.environ['TRIAGE_PATHES'])
+            run_summarize(os_name, 'summaryzators', p)
 
     elif triage:
         os_name = lin_or_win(triage)
@@ -111,7 +116,7 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, parse):
         else:
             with open(f"{BASE_DIR}/cache/latest.conf", "r") as latest:
                 triage = latest.readline()
-                run_analyze(os_name, plugin, triage)
+                run_parse_and_analyze(os_name, p, t, do_all, modules)
 
 if __name__ == "__main__":
     main()
