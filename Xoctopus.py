@@ -80,10 +80,10 @@ def lin_or_win(triage_path):
 @click.version_option("0.1.0", prog_name="Xoctopus")
 @click.command(no_args_is_help=True, epilog=help_epilog)
 @click.option('-t', '--triage', default=None, help='Path to triage (target)')
-@click.option('-p', '--plugin', default=None, help='Use specific plugin(module) example "parsers/bodytime"')
+@click.option('-p', '--plugin', default=None, help='Use specific plugin(module) example "parsers/lin/bodytime"')
 @click.option('-c', '--current',default=None, is_flag=True, help='Use current directory for analyze many triages')
 @click.option('-m', '--many-triage-dir', default=None, help='Path to dir with many triages')
-@click.option('-s', '--summarize', default=None, is_flag=True, help='Use current directory for analyze many triages')
+@click.option('-s', '--summarize', default=None, is_flag=True, help='Use summarizing mode')
 @click.option('-a', '--do-all', default=None, is_flag=True, help='Just do it all' )
 @click.option('--parse', '--only-parse', default=None, is_flag=True, help='Just only parse' )
 
@@ -115,6 +115,7 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, parse):
 
     elif triage:
         os_name = lin_or_win(triage)
+        print(os_name)
         os.environ["TRIAGE_NAME"] = triage.split('/')[-1]
         with open(f"{BASE_DIR}/cache/latest.conf", "w") as latest:
             latest.write(triage) 

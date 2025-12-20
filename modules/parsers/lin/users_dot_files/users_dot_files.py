@@ -21,7 +21,6 @@ def ssort_filename(path):
     
 def main():
     users = []
-    print(triage)
     if os.path.exists(f'{triage}/[root]/root/'):
         users.append('[root]/root/')
     if os.path.exists(f'{triage}[root]/home/'):  

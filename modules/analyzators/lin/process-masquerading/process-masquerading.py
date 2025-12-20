@@ -18,6 +18,7 @@ if __name__ == "__main__":
                 for pid in pid_list:
                     cmdline_path = f'{path_to_proc}/{pid}/cmdline.txt'
                     maps_path = f'{path_to_proc}/{pid}/maps.txt'
+                    flag = False
                     if os.path.exists(cmdline_path) and os.path.exists(maps_path):
                         with open(cmdline_path, 'r') as f:
                             cmdline = f.readline()
@@ -31,9 +32,11 @@ if __name__ == "__main__":
                         if stop_str:
                             cmdline = cmdline[:stop_str]
                         if cmdline != maps_exec_path:
+                            flag = True
                             of.write(cmdline + '\t' + maps_exec_path + '\t' + pid + '\n')
                     else:
                         continue
+            print(f'module proccess-masquerading: ALARM! find hidden proccess')
     else:
         print('path not exist :(')
         sys.exit(0)
