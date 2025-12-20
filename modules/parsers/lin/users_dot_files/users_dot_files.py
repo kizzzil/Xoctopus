@@ -40,7 +40,6 @@ def main():
         with open(f'{triage}/{prefix}{filename[1:]}', 'w') as collector: 
             for user in users:
                 path = f'{triage}/{user}/{filename}' 
-                print(path)
                 if os.path.exists(path):
                     with open(path, 'r') as f:
                         collector.writelines(f.readlines())
