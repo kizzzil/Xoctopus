@@ -20,7 +20,7 @@ def main():
             lines = [f'{line[:-1:]}|{path.split('/')[-2]}\n' for line in f.readlines()]
             text.extend(lines)
              
-    with open(f'{path}/../Xoctopus_super_bodyfile', 'w') as f:
+    with open(f'{path}/../super_Xoctopus_bodyfile', 'w') as f:
         f.writelines(text)
         
 if __name__ == '__main__':
