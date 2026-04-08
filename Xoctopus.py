@@ -73,7 +73,8 @@ def lin_or_win(triage_path):
     if os.path.exists(f'{triage_path}/[root]/') or \
             os.path.exists(f'{triage_path}/chkrootkit/'):
         return 'lin'
-    elif os.path.exists(f'{triage_path}/Target/'):
+    elif os.path.exists(f'{triage_path}/Target/') or \
+            os.path.exists(f'{triage_path}/C/$MFT'):
         return 'win'
     return None
 

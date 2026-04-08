@@ -42,11 +42,5 @@ def main():
             f.writelines(result[ip])
      
 
-
-
-
-    
-
-
 if __name__ == '__main__':
     main()
