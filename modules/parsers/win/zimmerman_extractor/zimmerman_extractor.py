@@ -10,14 +10,14 @@ zmpath = os.environ["ZIMMERMAN_TOOLS_PATH"]
 '''
 ['path_to_cd', 'exename', 'filename', 'save_dir_path']
 '''
-command_data = [['', 'MFTECmd.exe', '\\$Extend/\\$J" -m "\\$MFT', '../', ''], #$J and $MFT
+command_data = [['', 'MFTECmd.exe', '\\$Extend/\\$J" -m "\\$MFT', '../', 'J_and_MFT'], #$J and $MFT
                 ['Windows/AppCompat/Programs/', 'AmcacheParser.exe', 'Amcache.hve', '../../../../', 'Amcache_csv.csv'], #Amcahce
-                ['', 'MFTECmd.exe', '\\$MFT', '../', ''] #MFT if $J is not work
+                ['', 'MFTECmd.exe', '\\$MFT', '../', 'MFT'] #MFT if $J is not work
                 ]
 
 custom_command = [[f'Windows/System32/LogFiles/SUM', f'{zmpath}/SumECmd.exe -d "." --csv ../../../../../Sum.csv > /dev/null']]
 
-disks = ['C/', 'D/', 'E/', 'F/']
+disks = ['C', 'D', 'E', 'F']
 def main():
     # Необходимо для работы триажей с несколькими дисками
     for disk in disks:
@@ -30,7 +30,7 @@ def main():
                     os.chdir(f'{triage}/{disk}/{data[0]}')
                 else:
                     continue
-                cmd = f'{zmpath}/{data[1]} -f "{data[2]} " --csv "{data[3]}" --csvf "{data[4]}" > /dev/null'
+                cmd = f'{zmpath}/{data[1]} -f "{data[2]} " --csv "{data[3]}" --csvf "{data[4]}_{disk}.csv" > /dev/null'
                 os.system(cmd)
 
             for cmd in custom_command:
