@@ -1,10 +1,10 @@
 
 import os
 
-# Блок десериализации путей триажа и отбора только 'lin'
+# Блок десериализации путей триажа и отбора только 'win'
 triages = os.environ['TRIAGE_PATHES']
 triages = [pair.split(',') for pair in triages.split(";")]
-triages = [f'{path}/' for path, os_name in triages if os_name == 'lin']
+triages = [f'{path}/' for path, os_name in triages if os_name == 'win']
 
 def main():
     text = []

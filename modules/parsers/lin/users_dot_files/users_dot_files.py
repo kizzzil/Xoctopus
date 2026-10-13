@@ -23,8 +23,8 @@ def main():
     users = []
     if os.path.exists(f'{triage}/[root]/root/'):
         users.append('[root]/root/')
-    if os.path.exists(f'{triage}[root]/home/'):  
-        users_home = [f'[root]/home/{user}/' for user in os.listdir(f'{triage}[root]/home/')]
+    if os.path.exists(f'{triage}/[root]/home/'):
+        users_home = [f'[root]/home/{user}/' for user in os.listdir(f'{triage}/[root]/home/')]
         users.extend(users_home) 
     else:
         print('Module users_dot_files: ' + colorama.Fore.YELLOW + 'Warning! no users found in /home directory ')

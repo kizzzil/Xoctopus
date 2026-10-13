@@ -66,7 +66,7 @@ def run_summarize(modules, p):
         type_module, _, module_name = p.split('/')
         run_module(module_name, 'summaryzators', 'win')
     else:
-        for module_name in summaryzators_lin:
+        for module_name in summaryzators_win:
             run_module(module_name, 'summaryzators', 'win')
 
 def lin_or_win(triage_path):
@@ -118,17 +118,20 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, parse):
         os_name = lin_or_win(triage)
         print(os_name)
         os.environ["TRIAGE_NAME"] = triage.split('/')[-1]
+        os.makedirs(f"{BASE_DIR}/cache", exist_ok=True)
         with open(f"{BASE_DIR}/cache/latest.conf", "w") as latest:
             latest.write(triage) 
         run_parse_and_analyze(os_name, plugin, triage, do_all, modules)
     else:
-        if os.listdir(f"{BASE_DIR}/cache/") == []:
+        if not os.path.exists(f"{BASE_DIR}/cache/latest.conf"):
             click.echo('Please specify -t or -c parametr')
             sys.exit()
         else:
             with open(f"{BASE_DIR}/cache/latest.conf", "r") as latest:
-                triage = latest.readline()
-                run_parse_and_analyze(os_name, p, t, do_all, modules)
+                triage = latest.readline().strip()
+            os_name = lin_or_win(triage)
+            os.environ["TRIAGE_NAME"] = triage.split('/')[-1]
+            run_parse_and_analyze(os_name, plugin, triage, do_all, modules)
 
 if __name__ == "__main__":
     main()

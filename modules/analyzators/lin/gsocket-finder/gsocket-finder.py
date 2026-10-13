@@ -80,7 +80,7 @@ def main():
     print(current_connection)
     # Анализируем новые подключения от gsocket
     with open(f'{triage}/Xoctopus_gsocket_finder_res.txt', 'w') as f:
-        if pids is not None:
+        if pids:
             f.writelines([f'PID\tPATH\t\tCONNECT(FROM->TO)\n'])
             for pid in pids.keys():
                 row = f'{pid}\t{pids[pid]}\t'
@@ -91,9 +91,9 @@ def main():
                         row += f'NO CURRENT CONNECTION'
                 f.writelines([f'{row}\n'])
 
-        elif result_paths is not None:
-            f.writelines(['Подозрительные имена файлов'])
-            f.writelines(result_paths)
+        elif result_paths:
+            f.writelines(['Подозрительные имена файлов\n'])
+            f.writelines([f'{path}\n' for path in result_paths])
 
 if __name__ == '__main__':
     main()

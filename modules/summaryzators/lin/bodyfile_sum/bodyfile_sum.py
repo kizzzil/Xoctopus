@@ -1,4 +1,5 @@
 import os
+import sys
 
 # Блок десериализации путей триажа и отбора только 'lin'
 triages = os.environ['TRIAGE_PATHES']
@@ -17,7 +18,8 @@ def main():
             sys.exit(0)
 
         with open(filepath, 'r') as f:
-            lines = [f'{line[:-1:]}|{path.split('/')[-2]}\n' for line in f.readlines()]
+            hostname = path.split('/')[-2]
+            lines = [f'{line[:-1:]}|{hostname}\n' for line in f.readlines()]
             text.extend(lines)
              
     with open(f'{path}/../super_Xoctopus_bodyfile', 'w') as f:

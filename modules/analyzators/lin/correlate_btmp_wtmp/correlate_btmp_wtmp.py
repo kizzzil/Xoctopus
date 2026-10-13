@@ -13,8 +13,9 @@ def main():
      
     out = [f'{x.lstrip()}' for x in proc.stdout.split('\n')]
     out = out[:-1:]
+    out = [x for x in out if len(x.split()) == 2]
     with open(f'{btmp_path}_most_IPs', 'w') as f:
-        f.writelines(out)
+        f.writelines([f'{x}\n' for x in out])
 
     ips = {}
     splited_out = [x.split() for x in out] 
@@ -32,13 +33,13 @@ def main():
         for row in wtmp:
             if ip in row:
                 if ip in result.keys():
-                    result[ip] = result[ip].append(row)  
+                    result[ip].append(row)
                 else:
-                    result[ip] = [row]  
+                    result[ip] = [row]
 
     with open(f'{triage}/Xoctopus_correlate_btmp_wtmp', 'w') as f:
         for ip in result.keys():
-            f.writelines(['Successful bruteforce login'])
+            f.writelines([f'Successful bruteforce login from {ip} ({ips[ip]} failed attempts)\n'])
             f.writelines(result[ip])
      
 
