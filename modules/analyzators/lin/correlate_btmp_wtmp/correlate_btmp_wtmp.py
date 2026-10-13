@@ -1,6 +1,7 @@
 import os
 import sys
 from collections import Counter
+import xoctopus_log as log
 
 triage = os.environ["TRIAGE_PATH"]
 wtmp_path = f'{triage}/Xoctopus_wtmp'
@@ -10,7 +11,7 @@ boundary = 10
 
 def main():
     if not os.path.exists(btmp_path) or not os.path.exists(wtmp_path):
-        print('Module correlate_btmp_wtmp: Warning! run parser wtmp first')
+        log.warn('run parser wtmp first')
         sys.exit(0)
 
     # Подсчет неудачных попыток входа по IP (3-я колонка вывода last)
@@ -37,10 +38,14 @@ def main():
                 else:
                     result[ip] = [row]
 
-    with open(f'{triage}/Xoctopus_correlate_btmp_wtmp', 'w') as f:
+    res_path = f'{triage}/Xoctopus_correlate_btmp_wtmp'
+    with open(res_path, 'w') as f:
         for ip in result.keys():
             f.writelines([f'Successful bruteforce login from {ip} ({ips[ip]} failed attempts)\n'])
             f.writelines(result[ip])
+            log.alert('Successful login after bruteforce',
+                      details=f'{ip}: {ips[ip]} failed attempts, {len(result[ip])} successful login(s)', evidence=res_path)
+    log.info('done')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
-import datetime
 import sys
 import os
-import colorama
+import xoctopus_log as log
 from collections import Counter
 
 triage = os.environ["TRIAGE_PATH"]
@@ -27,8 +26,7 @@ def main():
         users_home = [f'[root]/home/{user}/' for user in os.listdir(f'{triage}/[root]/home/')]
         users.extend(users_home) 
     else:
-        print('Module users_dot_files: ' + colorama.Fore.YELLOW + 'Warning! no users found in /home directory ')
-        print(colorama.Style.RESET_ALL, end='')
+        log.warn('no users found in /home directory')
     if users == []:
         sys.exit(0)
     # type 0 - sort not required
@@ -48,4 +46,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    print('Module users_dot_files: ' + colorama.Fore.GREEN + 'Success')
+    log.info('done')

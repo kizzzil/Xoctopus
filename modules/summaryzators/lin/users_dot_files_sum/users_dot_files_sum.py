@@ -1,4 +1,5 @@
 import os
+import xoctopus_log as log
 
 # Блок десериализации путей триажа и отбора только 'lin'
 triages = os.environ['TRIAGE_PATHES']
@@ -29,8 +30,9 @@ def main():
                 text.append(f"###XOCOCTOPUS: hostname {path.split('/')[-2]}###\n")
                 with open(f'{path}/{filename}', 'r') as f:
                     text.extend(f.readlines())
-            with open(f'{path}/../super_{filename}', 'w') as f:
+            with open(f"{os.environ['XOCTOPUS_RUN_DIR']}/super_{filename}", 'w') as f:
                 f.writelines(text)
+    log.info('done')
 
 
         

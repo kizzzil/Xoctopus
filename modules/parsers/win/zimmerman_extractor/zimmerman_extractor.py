@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-import colorama
+import xoctopus_log as log
 
 triage = os.environ["TRIAGE_PATH"]
 zmpath = os.environ.get("ZIMMERMAN_TOOLS_PATH", "")
@@ -21,8 +21,7 @@ def commands(disk):
 disks = ['C', 'D', 'E', 'F']
 def main():
     if not os.path.isdir(zmpath):
-        print('Module zimmerman_extractor: ' + colorama.Fore.YELLOW +
-              f'Warning! Zimmerman tools not found: "{zmpath}". Use -z or env ZIMMERMAN_TOOLS_PATH' + colorama.Style.RESET_ALL)
+        log.warn(f'Zimmerman tools not found: "{zmpath}". Use -z or env ZIMMERMAN_TOOLS_PATH')
         sys.exit(0)
 
     failed = []
@@ -44,8 +43,10 @@ def main():
                 failed.append(f'{args[0]} ({disk}): exit code {proc.returncode}')
 
     if failed:
-        print('Module zimmerman_extractor: ' + colorama.Fore.RED + 'errors: ' + '; '.join(failed) + colorama.Style.RESET_ALL)
+        for message in failed:
+            log.error(message)
         sys.exit(1)
+    log.info('done')
 
 if __name__ == '__main__':
     main()

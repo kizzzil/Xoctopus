@@ -1,7 +1,7 @@
 import csv
 import sys
 import os
-import colorama
+import xoctopus_log as log
 from collections import defaultdict
 from datetime import datetime
 
@@ -13,14 +13,14 @@ def parse_datetime(dt_str):
 
 def read_lines(path):
     if not os.path.exists(path):
-        print(f'Module gsocket-finder: ' + colorama.Fore.YELLOW + f'Warning! file does not exist: {path}' + colorama.Style.RESET_ALL)
+        log.warn(f'file does not exist: {path}')
         return []
     with open(path, 'r', encoding='utf-8', errors='ignore') as f:
         return f.readlines()
 
 def main():
     if not os.path.exists(bodyfile_path):
-        print('Module gsocket-finder: ' + colorama.Fore.YELLOW + 'Warning! run parser bodytime first' + colorama.Style.RESET_ALL)
+        log.warn('run parser bodytime first')
         sys.exit(0)
 
     files_by_dir = defaultdict(list) 
@@ -86,9 +86,9 @@ def main():
             if pid in connect:
                 current_connection[pid] = connect[connect.index('TCP')::]
     
-    print(current_connection)
     # Анализируем новые подключения от gsocket
-    with open(f'{triage}/Xoctopus_gsocket_finder_res.txt', 'w') as f:
+    res_path = f'{triage}/Xoctopus_gsocket_finder_res.txt'
+    with open(res_path, 'w') as f:
         if pids:
             f.writelines([f'PID\tPATH\t\tCONNECT(FROM->TO)\n'])
             for pid in pids.keys():
@@ -99,10 +99,15 @@ def main():
                     else:
                         row += f'NO CURRENT CONNECTION'
                 f.writelines([f'{row}\n'])
+                log.alert('Possible gsocket process', details=row.replace('\t', ' '), evidence=res_path)
 
         elif result_paths:
             f.writelines(['Подозрительные имена файлов\n'])
             f.writelines([f'{path}\n' for path in result_paths])
+            for path in result_paths:
+                log.alert('Executable with oldest mtime in directory changed later (timestomping?)',
+                          details=path, evidence=res_path, severity='medium')
+    log.info('done')
 
 if __name__ == '__main__':
     main()

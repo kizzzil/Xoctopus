@@ -1,5 +1,6 @@
 import os
 import sys
+import xoctopus_log as log
 
 triage = os.environ["TRIAGE_PATH"]
 
@@ -11,10 +12,10 @@ if __name__ == "__main__":
         pid_list = os.listdir()
     
         # Проверяем существует ли вообще путь до папки (иногда его не бывает)
-        flag = False
         if os.path.exists(path_to_proc):
-            with open(f'{triage}/Xoctopus_proccess_masquerading.txt', 'w') as of:
-            
+            res_path = f'{triage}/Xoctopus_proccess_masquerading.txt'
+            with open(res_path, 'w') as of:
+                of.write('CMDLINE\tEXE(maps)\tPID\n')
                 for pid in pid_list:
                     cmdline_path = f'{path_to_proc}/{pid}/cmdline.txt'
                     maps_path = f'{path_to_proc}/{pid}/maps.txt'
@@ -33,12 +34,12 @@ if __name__ == "__main__":
                         if stop_str != -1:
                             cmdline = cmdline[:stop_str]
                         if cmdline != maps_exec_path:
-                            flag = True
                             of.write(cmdline + '\t' + maps_exec_path + '\t' + pid + '\n')
+                            log.alert('Process masquerading', details=f'pid {pid}: cmdline {cmdline}, exe {maps_exec_path}',
+                                      evidence=res_path)
                     else:
                         continue
-            if flag:
-                print(f'module proccess-masquerading: ALARM! find hidden proccess')
+        log.info('done')
     else:
-        print('path not exist :(')
+        log.warn(f'path does not exist: {path_to_proc}')
         sys.exit(0)

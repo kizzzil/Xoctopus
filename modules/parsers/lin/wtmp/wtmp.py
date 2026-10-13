@@ -1,8 +1,6 @@
-import datetime
-import sys
 import os
-import colorama
 import subprocess
+import xoctopus_log as log
 
 triage = os.environ["TRIAGE_PATH"]
 files = {'wtmp' : ['wtmp', 'wtmp.1'], 'btmp' : ['btmp', 'btmp.1'], 'utmp' : ['utmp', 'utmp.1']}
@@ -18,6 +16,7 @@ def main():
             res += proc.stdout
         with open(f'{triage}/Xoctopus_{category}', 'w') as f:
             f.write(res)
+    log.info('done')
 
 if __name__ == '__main__':
     main()

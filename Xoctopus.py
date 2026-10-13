@@ -2,11 +2,15 @@ import sys
 import os
 import subprocess
 import click            # requirements.txt
-import colorama
 from tqdm import tqdm   # requirements.txt
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, f'{BASE_DIR}/modules')
+import xoctopus_log as log
+
 MODULE_TYPES = ('parsers', 'analyzators', 'summaryzators')
+# all - модули, работающие с триажами любой ОС (например, сводка находок)
+OS_NAMES = ('lin', 'win', 'all')
 DEFAULT_ZIMMERMAN_PATH = '/mnt/c/tools/'
 
 # Модули, завершившиеся с ошибкой: (модуль, триаж, код возврата)
@@ -21,7 +25,7 @@ def list_modules(type_module, os_name):
 def build_epilog():
     lines = ['\b', 'AVAILABLE MODULES (use with -p):']
     for type_module in MODULE_TYPES:
-        for os_name in ('lin', 'win'):
+        for os_name in OS_NAMES:
             lines.extend(f'  {type_module}/{os_name}/{m}' for m in list_modules(type_module, os_name))
     return '\n'.join(lines)
 
@@ -29,14 +33,18 @@ def run_module(module_name, type_module, os_name, env):
     file_path = f"{BASE_DIR}/modules/{type_module}/{os_name}/{module_name}"
     if not os.path.isfile(f'{file_path}/{module_name}.py'):
         return
-    print(f"Running module: {module_name}", flush=True)
+    module = f'{type_module}/{os_name}/{module_name}'
+    host = env.get('TRIAGE_NAME', '-')
+    triage = env.get('TRIAGE_PATH', '')
+    log.info(f'running {module}', host=host, module='xoctopus', triage=triage)
+    # Модули импортируют общий xoctopus_log из папки modules
+    env = {**env, 'PYTHONPATH': os.pathsep.join(filter(None, [f'{BASE_DIR}/modules', env.get('PYTHONPATH')]))}
     try:
         subprocess.run([sys.executable, f"{module_name}.py"], check=True, cwd=file_path, env=env)
     except subprocess.CalledProcessError as e:
         # Ошибка одного модуля не должна останавливать обработку остальных
-        failed_modules.append((f'{type_module}/{os_name}/{module_name}', env.get('TRIAGE_NAME', '-'), e.returncode))
-        print(colorama.Fore.RED + f'Module {module_name}: FAILED (exit code {e.returncode})')
-    print(colorama.Style.RESET_ALL, end='')
+        failed_modules.append((module, host, e.returncode))
+        log.error(f'{module} failed with exit code {e.returncode}', host=host, module='xoctopus', triage=triage)
 
 '''
 run_parse_and_analyze() is a function, for analyze one triage
@@ -60,16 +68,17 @@ def run_parse_and_analyze(triage, plugin, do_all):
         for module in list_modules('analyzators', os_name):
             run_module(module, 'analyzators', os_name, env)
 
-def run_summarize(triages, plugin):
+def run_summarize(triages, plugin, run_dir):
     env = {**os.environ,
-           'TRIAGE_PATHES': ";".join(f"{t['triage']},{t['os']}" for t in triages)}
+           'TRIAGE_PATHES': ";".join(f"{t['triage']},{t['os']}" for t in triages),
+           'XOCTOPUS_RUN_DIR': run_dir}
 
     if plugin:
         _, os_name, module_name = plugin.split('/')
         run_module(module_name, 'summaryzators', os_name, env)
         return
 
-    for os_name in ('lin', 'win'):
+    for os_name in OS_NAMES:
         for module_name in list_modules('summaryzators', os_name):
             run_module(module_name, 'summaryzators', os_name, env)
 
@@ -116,8 +125,8 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, zimmerman_
     os.environ['ZIMMERMAN_TOOLS_PATH'] = zimmerman_path
 
     if current or many_triage_dir:
-        base_dir = f'{BASE_DIR}/..' if current else many_triage_dir
-        paths = [os.path.join(base_dir, d) for d in sorted(os.listdir(base_dir))]
+        run_dir = f'{BASE_DIR}/..' if current else many_triage_dir
+        paths = [os.path.join(run_dir, d) for d in sorted(os.listdir(run_dir))]
     else:
         latest_path = f"{BASE_DIR}/cache/latest.conf"
         if triage:
@@ -132,25 +141,31 @@ def main(triage, plugin, current, many_triage_dir, summarize, do_all, zimmerman_
             click.echo('Please specify -t or -c parametr')
             sys.exit(1)
         paths = [triage]
+        run_dir = os.path.dirname(os.path.realpath(triage))
 
     triages = make_triages(paths)
     if not triages:
         click.echo('No suitable triages found (unable to determine OS of triage)')
         sys.exit(1)
 
+    # Общий лог прогона в папке с триажами; модули получают путь через окружение
+    run_dir = os.path.realpath(run_dir)
+    os.environ['XOCTOPUS_RUN_LOG'] = os.path.join(run_dir, 'Xoctopus_run.log')
+    log.info(f'run started: {len(triages)} triage(s), args: {" ".join(sys.argv[1:])}', module='xoctopus')
+
     for triage in tqdm(triages, disable=len(triages) == 1):
-        print(f"### TRIAGE: {triage['name']} ({triage['os']}) ###")
+        log.info(f"processing triage ({triage['os']}) {triage['triage']}",
+                 host=triage['name'], module='xoctopus', triage=triage['triage'])
         run_parse_and_analyze(triage, plugin, do_all)
 
     if summarize or do_all or (plugin and plugin.startswith('summaryzators/')):
-        print('### RUN SUMMARYZATORS###')
-        run_summarize(triages, plugin)
+        log.info('running summaryzators', module='xoctopus')
+        run_summarize(triages, plugin, run_dir)
 
+    for module, host, code in failed_modules:
+        log.error(f'FAILED {module} [{host}]: exit code {code}', module='xoctopus')
+    log.info(f'run finished: {len(failed_modules)} failed module(s)', module='xoctopus')
     if failed_modules:
-        print(colorama.Fore.RED + 'Failed modules:')
-        for module, triage_name, code in failed_modules:
-            print(f'  {module} [{triage_name}]: exit code {code}')
-        print(colorama.Style.RESET_ALL, end='')
         sys.exit(1)
 
 if __name__ == "__main__":
