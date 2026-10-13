@@ -11,7 +11,18 @@ bodyfile_path = f'{triage}/Xoctopus_bodyfile_convert.txt'
 def parse_datetime(dt_str):
     return datetime.strptime(dt_str, "%d.%m.%Y %H:%M:%S")
 
+def read_lines(path):
+    if not os.path.exists(path):
+        print(f'Module gsocket-finder: ' + colorama.Fore.YELLOW + f'Warning! file does not exist: {path}' + colorama.Style.RESET_ALL)
+        return []
+    with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+        return f.readlines()
+
 def main():
+    if not os.path.exists(bodyfile_path):
+        print('Module gsocket-finder: ' + colorama.Fore.YELLOW + 'Warning! run parser bodytime first' + colorama.Style.RESET_ALL)
+        sys.exit(0)
+
     files_by_dir = defaultdict(list) 
 
     with open(bodyfile_path, 'r') as f:
@@ -53,8 +64,7 @@ def main():
     pids = defaultdict(list)
 
     # Поиск таких файлов, которые запущены в процессах
-    with open(f'{triage}/live_response/process/running_processes_full_paths.txt', 'r') as f:
-        proc_full_paths = f.readlines()
+    proc_full_paths = read_lines(f'{triage}/live_response/process/running_processes_full_paths.txt')
 
     for path in result_paths:
         for full_path_str in proc_full_paths:
@@ -69,8 +79,7 @@ def main():
     # Проверка активных подключений
     current_connection = defaultdict(list)
 
-    with open(f'{triage}/live_response/process/lsof_-nPl.txt', 'r') as f:
-        connections = [x for x in f.readlines() if 'TCP' in x ]
+    connections = [x for x in read_lines(f'{triage}/live_response/process/lsof_-nPl.txt') if 'TCP' in x]
 
     for pid in pids.keys():
         for connect in connections:

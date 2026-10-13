@@ -9,3 +9,4 @@ CLAUDE.local.md
 .mcp.json
 __pycache__/
 *.pyc
+.pytest_cache/

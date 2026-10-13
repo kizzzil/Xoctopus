@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 
 triage = os.environ["TRIAGE_PATH"]
 
@@ -25,6 +24,8 @@ if __name__ == "__main__":
                         with open(maps_path, 'r') as f:
                             maps = f.readlines()
 
+                        if not maps or not maps[0].split() or not cmdline:
+                            continue
                         maps_exec_path = maps[0].split()[-1]
                         if cmdline[0] != '/':
                             continue

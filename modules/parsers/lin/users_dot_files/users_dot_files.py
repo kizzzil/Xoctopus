@@ -41,7 +41,7 @@ def main():
             for user in users:
                 path = f'{triage}/{user}/{filename}' 
                 if os.path.exists(path):
-                    with open(path, 'r') as f:
+                    with open(path, 'r', encoding='utf-8', errors='ignore') as f:
                         collector.writelines(f.readlines())
         if filenames[filename] == 1:
             ssort_filename(f'{triage}/{prefix}{filename[1:]}')
